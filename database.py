@@ -416,7 +416,9 @@ else:
             ('413', 'Sand Filling Labour', 'CONSTRUCTION', 'EXPENSE', 'Sand filling work'),
         ]
         existing = get_client().table("account_codes").select("code").execute()
-        existing_codes = {r.code for r in existing.data} if getattr(existing, 'data', None) else set()
+        raw = getattr(existing, 'data', None)
+        existing_data = raw if isinstance(raw, list) else []
+        existing_codes = {r['code'] for r in existing_data}
         to_insert = [
             {"code": code, "name": name, "category": cat, "type": typ, "description": desc}
             for code, name, cat, typ, desc in accs if code not in existing_codes
