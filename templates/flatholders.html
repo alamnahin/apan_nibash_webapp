@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flatholders - APAN NIBASH</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --bg-color: #f8f9fa;
+        }
+
+        body {
+            background: var(--bg-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .sidebar {
+            min-height: 100vh;
+            background: var(--primary-color);
+            color: white;
+            padding-top: 20px;
+        }
+
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 12px 20px;
+            border-radius: 5px;
+            margin: 5px 10px;
+            transition: all 0.3s;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .card-box {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .badge-not-paid {
+            background: rgba(231, 76, 60, 0.15);
+            color: var(--danger-color);
+        }
+
+        .badge-partial {
+            background: rgba(243, 156, 18, 0.2);
+            color: #946200;
+        }
+
+        .badge-full {
+            background: rgba(39, 174, 96, 0.15);
+            color: var(--success-color);
+        }
+
+        .summary-pill {
+            border-radius: 8px;
+            background: #f3f7fb;
+            padding: 12px 14px;
+            min-height: 72px;
+        }
+
+        .summary-title {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        .summary-value {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 767.98px) {
+            .sidebar {
+                min-height: auto;
+                padding-top: 12px;
+            }
+
+            .sidebar-nav.collapse:not(.show) {
+                display: none;
+            }
+
+            .sidebar-nav.collapse.show {
+                display: flex;
+            }
+
+            .sidebar .nav-link {
+                margin: 4px 8px;
+                padding: 10px 14px;
+            }
+
+            .main-content {
+                padding: 16px;
+            }
+
+            .main-content .d-flex.justify-content-between.align-items-center.mb-4 {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 12px;
+            }
+
+            .card-box,
+            .summary-pill {
+                padding: 16px;
+            }
+
+            .summary-pill {
+                min-height: auto;
+            }
+
+            .row.mb-4>[class*='col-'] {
+                width: 100%;
+                margin-bottom: 1rem;
+            }
+
+            .table-responsive {
+                overflow-x: auto;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .sidebar-nav {
+                display: flex !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 sidebar">
+                <div class="d-flex justify-content-between align-items-center mb-2 px-2">
+                    <h4 class="mb-0">APAN NIBASH</h4>
+                    <button class="btn btn-sm btn-outline-light d-md-none" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#sidebarNav" aria-controls="sidebarNav" aria-expanded="false"
+                        aria-label="Toggle navigation">
+                        <i class="bi bi-list"></i>
+                    </button>
+                </div>
+                <div class="text-center mb-4">
+                    <small>Datta Para, Tongi</small>
+                </div>
+                <nav id="sidebarNav" class="nav flex-column sidebar-nav collapse">
+                    <a class="nav-link" href="/"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
+                    <a class="nav-link" href="/voucher/new"><i class="bi bi-plus-circle me-2"></i> New Voucher</a>
+                    <a class="nav-link" href="/vouchers"><i class="bi bi-receipt me-2"></i> All Vouchers</a>
+                    <a class="nav-link active" href="/flatholders"><i class="bi bi-people me-2"></i> Flatholders</a>
+                    <a class="nav-link" href="/reports"><i class="bi bi-graph-up me-2"></i> Reports</a>
+                    <a class="nav-link" href="/logout"><i class="bi bi-box-arrow-right me-2"></i> Logout</a>
+                </nav>
+            </div>
+
+            <div class="col-md-10 main-content">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Flatholders</h2>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addFlatholderModal">
+                        <i class="bi bi-person-plus me-1"></i>Add Flatholder
+                    </button>
+                </div>
+
+                <div id="alertBox"></div>
+
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="summary-pill">
+                            <div class="summary-title">Total Buyers</div>
+                            <div class="summary-value" id="totalBuyers">0</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="summary-pill">
+                            <div class="summary-title">Total Committed</div>
+                            <div class="summary-value" id="totalCommitted">৳0</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="summary-pill">
+                            <div class="summary-title">Total Collected</div>
+                            <div class="summary-value" id="totalCollected">৳0</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="summary-pill">
+                            <div class="summary-title">Total Due</div>
+                            <div class="summary-value" id="totalDue">৳0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-box">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>SL</th>
+                                    <th>Name</th>
+                                    <th>Contact</th>
+                                    <th>Flat Unit</th>
+                                    <th class="text-end">Total Amount</th>
+                                    <th class="text-end">Paid</th>
+                                    <th class="text-end">Due</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="flatholderRows"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addFlatholderModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Flatholder</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="flatholderModalAlert"></div>
+                    <form id="addFlatholderForm">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">Serial No</label>
+                                <input type="number" id="serialNo" class="form-control" min="1" step="1" required>
+                            </div>
+                            <div class="col-md-9">
+                                <label class="form-label">Name</label>
+                                <input type="text" id="holderName" class="form-control" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Phone</label>
+                                <input type="text" id="holderPhone" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Email</label>
+                                <input type="email" id="holderEmail" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Flat Unit</label>
+                                <input type="text" id="holderFlat" class="form-control" placeholder="e.g. B3">
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label">Address</label>
+                                <input type="text" id="holderAddress" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Total Amount</label>
+                                <input type="number" id="holderTotalAmount" class="form-control" min="0" step="0.01"
+                                    required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-light border" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-primary" id="saveFlatholderBtn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addPaymentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Payment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addPaymentForm">
+                        <input type="hidden" id="paymentFlatholderId">
+                        <div class="mb-3">
+                            <label class="form-label">Payment Date</label>
+                            <input type="date" id="paymentDate" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Amount</label>
+                            <input type="number" id="paymentAmount" class="form-control" min="0.01" step="0.01"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Payment Type</label>
+                            <select id="paymentType" class="form-select" required>
+                                <option value="BOOKING">Booking</option>
+                                <option value="DOWN_PAYMENT">Down Payment</option>
+                                <option value="INSTALLMENT" selected>Installment</option>
+                                <option value="FINAL">Final</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label">Notes</label>
+                            <input type="text" id="paymentNotes" class="form-control">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-light border" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-primary" id="savePaymentBtn">Add Payment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editFlatholderModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Flatholder</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="editFlatholderModalAlert"></div>
+                    <form id="editFlatholderForm">
+                        <input type="hidden" id="editFlatholderId">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">Serial No</label>
+                                <input type="number" id="editSerialNo" class="form-control" min="1" step="1" required>
+                            </div>
+                            <div class="col-md-9">
+                                <label class="form-label">Name</label>
+                                <input type="text" id="editHolderName" class="form-control" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Phone</label>
+                                <input type="text" id="editHolderPhone" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Email</label>
+                                <input type="email" id="editHolderEmail" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Flat Unit</label>
+                                <input type="text" id="editHolderFlat" class="form-control" placeholder="e.g. B3">
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label">Address</label>
+                                <input type="text" id="editHolderAddress" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Total Amount</label>
+                                <input type="number" id="editHolderTotalAmount" class="form-control" min="0" step="0.01"
+                                    required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-light border" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-primary" id="updateFlatholderBtn">Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const rowsEl = document.getElementById('flatholderRows');
+        const addFlatholderModal = new bootstrap.Modal(document.getElementById('addFlatholderModal'));
+        const addPaymentModal = new bootstrap.Modal(document.getElementById('addPaymentModal'));
+        const editFlatholderModal = new bootstrap.Modal(document.getElementById('editFlatholderModal'));
+        const flatholderModalAlert = document.getElementById('flatholderModalAlert');
+        const editFlatholderModalAlert = document.getElementById('editFlatholderModalAlert');
+        let cachedFlatholders = [];
+
+        document.getElementById('saveFlatholderBtn').addEventListener('click', saveFlatholder);
+        document.getElementById('savePaymentBtn').addEventListener('click', savePayment);
+        document.getElementById('updateFlatholderBtn').addEventListener('click', updateFlatholder);
+        document.getElementById('addFlatholderModal').addEventListener('shown.bs.modal', prefillNextSerial);
+
+        document.getElementById('paymentDate').value = new Date().toISOString().slice(0, 10);
+
+        loadFlatholders();
+
+        async function loadFlatholders() {
+            try {
+                const res = await fetch('/api/flatholders');
+                const result = await res.json();
+                if (!res.ok || !result.success) {
+                    throw new Error(result.error || 'Failed to load flatholders');
+                }
+                const items = result.data || [];
+                cachedFlatholders = items;
+                renderRows(items);
+                renderSummary(items);
+            } catch (error) {
+                showAlert(error.message, 'danger');
+            }
+        }
+
+        function renderRows(items) {
+            rowsEl.innerHTML = '';
+
+            items.forEach((item) => {
+                const statusClass = item.payment_status === 'FULL' ? 'badge-full' : item.payment_status === 'PARTIAL' ? 'badge-partial' : 'badge-not-paid';
+                const statusLabel = item.payment_status === 'FULL' ? 'Full Paid' : item.payment_status === 'PARTIAL' ? 'Partial' : 'Not Paid';
+
+                const tr = document.createElement('tr');
+                tr.innerHTML =
+                    '<td>' + safe(item.serial_no) + '</td>' +
+                    '<td><div>' + safe(item.name) + '</div><small class="text-muted">' + safe(item.address || '-') + '</small></td>' +
+                    '<td><div>' + safe(item.phone || '-') + '</div><small class="text-muted">' + safe(item.email || '-') + '</small></td>' +
+                    '<td>' + safe(item.flat_unit || '-') + '</td>' +
+                    '<td class="text-end">' + money(item.total_amount) + '</td>' +
+                    '<td class="text-end">' + money(item.paid_amount) + '</td>' +
+                    '<td class="text-end text-danger fw-semibold">' + money(item.due_amount) + '</td>' +
+                    '<td><span class="badge ' + statusClass + '">' + statusLabel + '</span></td>' +
+                    '<td class="text-end">' +
+                    '<button class="btn btn-sm btn-outline-primary me-1" onclick="openPaymentModal(' + item.id + ')"><i class="bi bi-cash-stack"></i></button>' +
+                    '<button class="btn btn-sm btn-outline-secondary me-1" onclick="openEditFlatholderModal(' + item.id + ')"><i class="bi bi-pencil"></i></button>' +
+                    '<button class="btn btn-sm btn-outline-danger" onclick="deleteFlatholder(' + item.id + ')"><i class="bi bi-trash"></i></button>' +
+                    '</td>';
+                rowsEl.appendChild(tr);
+            });
+        }
+
+        function renderSummary(items) {
+            let totalCommitted = 0;
+            let totalCollected = 0;
+            let totalDue = 0;
+
+            items.forEach((item) => {
+                totalCommitted += Number(item.total_amount || 0);
+                totalCollected += Number(item.paid_amount || 0);
+                totalDue += Number(item.due_amount || 0);
+            });
+
+            document.getElementById('totalBuyers').textContent = items.length;
+            document.getElementById('totalCommitted').textContent = money(totalCommitted);
+            document.getElementById('totalCollected').textContent = money(totalCollected);
+            document.getElementById('totalDue').textContent = money(totalDue);
+        }
+
+        async function saveFlatholder() {
+            showModalAlert('', 'danger');
+            const payload = {
+                serial_no: Number(document.getElementById('serialNo').value),
+                name: document.getElementById('holderName').value.trim(),
+                phone: document.getElementById('holderPhone').value.trim(),
+                email: document.getElementById('holderEmail').value.trim(),
+                address: document.getElementById('holderAddress').value.trim(),
+                flat_unit: document.getElementById('holderFlat').value.trim(),
+                total_amount: Number(document.getElementById('holderTotalAmount').value || 0)
+            };
+
+            if (!payload.serial_no || !payload.name || payload.total_amount < 0) {
+                showModalAlert('Please fill required flatholder fields correctly.', 'danger');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/flatholder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+                if (!res.ok || !result.success) {
+                    throw new Error(result.error || 'Failed to add flatholder');
+                }
+                document.getElementById('addFlatholderForm').reset();
+                showModalAlert('', 'danger');
+                addFlatholderModal.hide();
+                showAlert('Flatholder added successfully.', 'success');
+                await loadFlatholders();
+            } catch (error) {
+                showModalAlert(error.message, 'danger');
+            }
+        }
+
+        function prefillNextSerial() {
+            const serialEl = document.getElementById('serialNo');
+            const currentValue = Number(serialEl.value || 0);
+            if (currentValue > 0) {
+                return;
+            }
+
+            let maxSerial = 0;
+            cachedFlatholders.forEach((item) => {
+                const serial = Number(item.serial_no || 0);
+                if (serial > maxSerial) {
+                    maxSerial = serial;
+                }
+            });
+
+            if (maxSerial > 0) {
+                serialEl.value = String(maxSerial + 1);
+            }
+        }
+
+        function openPaymentModal(flatholderId) {
+            document.getElementById('paymentFlatholderId').value = flatholderId;
+            document.getElementById('addPaymentForm').reset();
+            document.getElementById('paymentDate').value = new Date().toISOString().slice(0, 10);
+            document.getElementById('paymentType').value = 'INSTALLMENT';
+            addPaymentModal.show();
+        }
+
+        async function savePayment() {
+            const flatholderId = Number(document.getElementById('paymentFlatholderId').value);
+            const payload = {
+                payment_date: document.getElementById('paymentDate').value,
+                amount: Number(document.getElementById('paymentAmount').value || 0),
+                payment_type: document.getElementById('paymentType').value,
+                notes: document.getElementById('paymentNotes').value.trim()
+            };
+
+            if (!flatholderId || !payload.payment_date || payload.amount <= 0) {
+                showAlert('Please provide valid payment details.', 'danger');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/flatholder/' + flatholderId + '/payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+                if (!res.ok || !result.success) {
+                    throw new Error(result.error || 'Failed to add payment');
+                }
+                addPaymentModal.hide();
+                showAlert('Payment added successfully.', 'success');
+                await loadFlatholders();
+            } catch (error) {
+                showAlert(error.message, 'danger');
+            }
+        }
+
+        function openEditFlatholderModal(id) {
+            const item = cachedFlatholders.find((x) => Number(x.id) === Number(id));
+            if (!item) {
+                showAlert('Flatholder not found for edit.', 'danger');
+                return;
+            }
+
+            showEditModalAlert('', 'danger');
+            document.getElementById('editFlatholderId').value = item.id;
+            document.getElementById('editSerialNo').value = item.serial_no || '';
+            document.getElementById('editHolderName').value = item.name || '';
+            document.getElementById('editHolderPhone').value = item.phone || '';
+            document.getElementById('editHolderEmail').value = item.email || '';
+            document.getElementById('editHolderAddress').value = item.address || '';
+            document.getElementById('editHolderFlat').value = item.flat_unit || '';
+            document.getElementById('editHolderTotalAmount').value = item.total_amount || 0;
+
+            editFlatholderModal.show();
+        }
+
+        async function updateFlatholder() {
+            const id = Number(document.getElementById('editFlatholderId').value || 0);
+            const payload = {
+                serial_no: Number(document.getElementById('editSerialNo').value),
+                name: document.getElementById('editHolderName').value.trim(),
+                phone: document.getElementById('editHolderPhone').value.trim(),
+                email: document.getElementById('editHolderEmail').value.trim(),
+                address: document.getElementById('editHolderAddress').value.trim(),
+                flat_unit: document.getElementById('editHolderFlat').value.trim(),
+                total_amount: Number(document.getElementById('editHolderTotalAmount').value || 0)
+            };
+
+            if (!id || !payload.serial_no || !payload.name || payload.total_amount < 0) {
+                showEditModalAlert('Please fill required flatholder fields correctly.', 'danger');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/flatholder/' + id, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+                if (!res.ok || !result.success) {
+                    throw new Error(result.error || 'Failed to update flatholder');
+                }
+
+                editFlatholderModal.hide();
+                showAlert('Flatholder updated successfully.', 'success');
+                await loadFlatholders();
+            } catch (error) {
+                showEditModalAlert(error.message, 'danger');
+            }
+        }
+
+        async function deleteFlatholder(id) {
+            const item = cachedFlatholders.find((x) => Number(x.id) === Number(id));
+            const name = item ? item.name : 'this flatholder';
+            if (!confirm('Delete ' + name + '? This will also delete related payment records.')) {
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/flatholder/' + id, { method: 'DELETE' });
+                const result = await res.json();
+                if (!res.ok || !result.success) {
+                    throw new Error(result.error || 'Failed to delete flatholder');
+                }
+                showAlert('Flatholder deleted successfully.', 'success');
+                await loadFlatholders();
+            } catch (error) {
+                showAlert(error.message, 'danger');
+            }
+        }
+
+        function showAlert(message, type) {
+            document.getElementById('alertBox').innerHTML = '<div class="alert alert-' + type + ' alert-dismissible fade show" role="alert">' +
+                message +
+                '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+        }
+
+        function showModalAlert(message, type) {
+            if (!message) {
+                flatholderModalAlert.innerHTML = '';
+                return;
+            }
+
+            flatholderModalAlert.innerHTML = '<div class="alert alert-' + type + '" role="alert">' +
+                safe(message) +
+                '</div>';
+        }
+
+        function showEditModalAlert(message, type) {
+            if (!message) {
+                editFlatholderModalAlert.innerHTML = '';
+                return;
+            }
+
+            editFlatholderModalAlert.innerHTML = '<div class="alert alert-' + type + '" role="alert">' +
+                safe(message) +
+                '</div>';
+        }
+
+        function money(value) {
+            // Convert INTEGER cents to currency display (e.g., 1000 -> 10.00)
+            return '৳' + Number((value || 0) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function safe(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+    </script>
+</body>
+
+</html>
